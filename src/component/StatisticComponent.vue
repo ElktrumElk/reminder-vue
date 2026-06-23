@@ -1,5 +1,33 @@
 <script lang="ts" setup>
+import { ref, watch } from 'vue'
 import { stats } from '@/data/general'
+
+const animated = ref<number[]>(stats.value.map(() => 0))
+
+const animateValue = (from: number, to: number, idx: number) => {
+  const duration = 500
+  const start = performance.now()
+  const diff = to - from
+  const frame = (now: number) => {
+    const t = Math.min((now - start) / duration, 1)
+    const eased = 1 - Math.pow(1 - t, 3)
+    animated.value[idx] = Math.round(from + diff * eased)
+    if (t < 1) requestAnimationFrame(frame)
+  }
+  requestAnimationFrame(frame)
+}
+
+watch(
+  stats,
+  (s) => {
+    s.forEach((stat, i) => {
+      const target = stat.value as number
+      const current = animated.value[i] ?? 0
+      animateValue(current, target, i)
+    })
+  },
+  { immediate: true },
+)
 </script>
 <template>
   <section>
@@ -12,7 +40,7 @@ import { stats } from '@/data/general'
         </div>
 
         <div class="value-cnt">
-          <span>{{ stat.value }}</span>
+          <span class="num">{{ animated[idx] }}</span>
         </div>
 
         <div v-if="idx === 0">

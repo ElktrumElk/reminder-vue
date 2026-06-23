@@ -1,13 +1,35 @@
 <script setup lang="ts">
-import { handleSubgoalScoped, reminders } from '@/data/general'
+import {
+  handleSubgoalScoped,
+  reminders,
+  setReminders,
+  setSubGoalData,
+  setStats,
+  stats,
+  subGoalData,
+} from '@/data/general'
 import StatisticComponent from './StatisticComponent.vue'
 import { useRerender } from '@/lib/render-vue.ts'
 import { setForePanel } from '@/context/genral.ts'
 
 const [isGoalSet, setGoal] = useRerender<number[]>([])
 
-const removeGoal = (idx: number) => {
-  console.log(isGoalSet.value, idx)
+const deleteGoal = (id: number) => {
+  const idx = reminders.value.findIndex((r) => r.id === id)
+  if (idx === -1) return
+  setReminders(reminders.value, (prev) => {
+    prev.splice(idx, 1)
+  })
+  const key = `c${id}`
+  if (subGoalData.value[key]) {
+    setSubGoalData(subGoalData.value, (prev) => {
+      delete prev[key]
+    })
+  }
+  setStats(stats.value, (prev) => {
+    const setStat = prev.find((s) => s.title === 'Goals Set')
+    if (setStat) setStat.value = Math.max(0, (setStat.value as number) - 1)
+  })
 }
 </script>
 
@@ -31,7 +53,6 @@ const removeGoal = (idx: number) => {
                     setGoal(isGoalSet, (prev) =>
                       isGoalSet?.includes(idx) ? prev?.filter((x) => x !== idx) : prev?.push(idx),
                     )
-                    removeGoal(idx)
                   }
                 "
                 :class="isGoalSet?.includes(idx) ? 'onset-btn active' : 'onset-btn'"
@@ -39,9 +60,9 @@ const removeGoal = (idx: number) => {
               <h3 class="title">{{ reminder.title }}</h3>
             </div>
 
-            <div>
+            <div class="cd-actions">
               <span class="date">{{ reminder.remindTime }}</span>
-              <img />
+              <button class="delete-btn click-effect" @click="deleteGoal(reminder.id)">✕</button>
             </div>
           </div>
 
@@ -170,6 +191,26 @@ main {
 
 .date {
   color: var(--text-muted);
+}
+
+.cd-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  line-height: 1;
+}
+.delete-btn:hover {
+  color: #e74c3c;
 }
 
 .desc-cnt {
