@@ -68,6 +68,17 @@ export interface subgoaldata {
 export const [subGoals, setSubGoal] = useRerender<string[]>([])
 export const [subGoalData, setSubGoalData] = useRerender<Record<string, subgoaldata[]>>({})
 export const [subgoalScoped, setSubgoalScoped] = useRerender<subgoaldata[]>([])
+export const [goalTitle, setGoalTitle] = useRerender<string>('')
+
+export const [filter, setFilter] = useRerender<string>('all')
+export const [completedIds, setCompletedIds] = useRerender<number[]>([])
+export const [editData, setEditData] = useRerender<{
+  id: number
+  title: string
+  description: string
+  remindTime: string
+  setTime: string
+} | null>(null)
 
 export const handleSubgoalScoped = (id: number) => {
   const key = `c${id}`

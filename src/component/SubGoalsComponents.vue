@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { subgoalScoped } from '@/data/general'
+import { goalTitle, subgoalScoped } from '@/data/general'
 </script>
 
 <template>
   <div class="x">
-    <h1>Task 1</h1>
+    <h1>{{ goalTitle }}</h1>
 
     <ol>
       <li v-for="(data, idx) in subgoalScoped" :key="idx">
@@ -35,7 +35,6 @@ import { subgoalScoped } from '@/data/general'
 .x * {
   width: 100%;
 }
-
 
 .x ol {
   display: flex;

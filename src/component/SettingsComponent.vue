@@ -4,19 +4,13 @@ import { theme, toggleTheme } from '@/context/theme'
 
 <template>
   <main class="settings-page">
-    <h2 class="settings-title">Settings</h2>
-
     <div class="settings-card">
       <div class="setting-row">
         <div class="setting-info">
           <span class="setting-label">Dark Mode</span>
           <span class="setting-desc">Switch between light and dark theme</span>
         </div>
-        <button
-          class="toggle-btn"
-          :class="{ active: theme === 'dark' }"
-          @click="toggleTheme"
-        >
+        <button class="toggle-btn" :class="{ active: theme === 'dark' }" @click="toggleTheme">
           <div class="toggle-knob"></div>
         </button>
       </div>
@@ -31,15 +25,9 @@ import { theme, toggleTheme } from '@/context/theme'
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
+  padding: 2rem 0.2rem;
   padding-block-end: 10rem;
   gap: 1.5rem;
-}
-
-.settings-title {
-  font-size: 1.5rem;
-  color: var(--text-primary);
-  align-self: flex-start;
 }
 
 .settings-card {
@@ -57,12 +45,13 @@ import { theme, toggleTheme } from '@/context/theme'
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
+  line-height: normal;
 }
 
 .setting-info {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 1rem;
 }
 
 .setting-label {
@@ -73,6 +62,7 @@ import { theme, toggleTheme } from '@/context/theme'
 .setting-desc {
   font-size: 0.85rem;
   color: var(--text-muted);
+  line-height: 0.85rem;
 }
 
 .toggle-btn {

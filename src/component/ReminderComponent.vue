@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import {
   handleSubgoalScoped,
   reminders,
@@ -7,12 +8,29 @@ import {
   setStats,
   stats,
   subGoalData,
+  setGoalTitle,
+  filter,
+  setFilter,
+  completedIds,
+  setCompletedIds,
+  editData,
+  setEditData,
 } from '@/data/general'
 import StatisticComponent from './StatisticComponent.vue'
 import { useRerender } from '@/lib/render-vue.ts'
-import { setForePanel } from '@/context/genral.ts'
+import { setAddPanel, setForePanel } from '@/context/genral.ts'
 
 const [isGoalSet, setGoal] = useRerender<number[]>([])
+
+const filteredReminders = computed(() => {
+  return reminders.value.filter((r) => {
+    if (filter.value === 'all') return true
+    if (filter.value === 'onset') return isGoalSet.value?.includes(r.id) ?? false
+    if (filter.value === 'unactive') return !(isGoalSet.value?.includes(r.id) ?? false)
+    if (filter.value === 'completed') return completedIds.value.includes(r.id)
+    return true
+  })
+})
 
 const deleteGoal = (id: number) => {
   const idx = reminders.value.findIndex((r) => r.id === id)
@@ -30,38 +48,80 @@ const deleteGoal = (id: number) => {
     const setStat = prev.find((s) => s.title === 'Goals Set')
     if (setStat) setStat.value = Math.max(0, (setStat.value as number) - 1)
   })
+  setCompletedIds(completedIds.value, (prev) => {
+    const i = prev.indexOf(id)
+    if (i !== -1) prev.splice(i, 1)
+  })
 }
+
+const editGoal = (id: number) => {
+  const reminder = reminders.value.find((r) => r.id === id)
+  if (!reminder) return
+  setEditData(editData.value, () => ({
+    id: reminder.id,
+    title: reminder.title,
+    description: reminder.description,
+    remindTime: reminder.remindTime,
+    setTime: reminder.setTime,
+  }))
+  setAddPanel(true)
+}
+
+const toggleComplete = (id: number) => {
+  setCompletedIds(completedIds.value, (prev) => {
+    const idx = prev.indexOf(id)
+    if (idx === -1) prev.push(id)
+    else prev.splice(idx, 1)
+  })
+}
+
+const handleOnset = (id: number) => {
+  setGoal(
+    isGoalSet.value.includes(id)
+      ? isGoalSet.value.filter((x) => x != id)
+      : [...isGoalSet.value, id],
+  )
+}
+
 </script>
 
 <template>
   <main>
     <StatisticComponent />
     <div class="btns-cnt">
-      <button>All</button>
-      <button>Onset</button>
-      <button>Completed</button>
+      <button :class="{ active: filter === 'all' }" @click="setFilter('all', () => {})">All</button>
+      <button :class="{ active: filter === 'onset' }" @click="setFilter('onset', () => {})">
+        Onset
+      </button>
+      <button :class="{ active: filter === 'unactive' }" @click="setFilter('unactive', () => {})">
+        Unactive
+      </button>
+      <button :class="{ active: filter === 'completed' }" @click="setFilter('completed', () => {})">
+        Completed
+      </button>
     </div>
 
     <section class="r-section">
       <TransitionGroup name="card-stagger" tag="div" class="r-div">
-        <div class="card" v-for="(reminder, idx) in reminders" :key="reminder.id" :style="{ '--i': idx }">
+        <div
+          class="card"
+          :class="{ 'is-completed': completedIds.includes(reminder.id) }"
+          v-for="(reminder, idx) in filteredReminders"
+          :key="reminder.id"
+          :style="{ '--i': idx }"
+        >
           <div class="cd-header">
             <div class="cd-div-1">
               <button
-                @click="
-                  () => {
-                    setGoal(isGoalSet, (prev) =>
-                      isGoalSet?.includes(idx) ? prev?.filter((x) => x !== idx) : prev?.push(idx),
-                    )
-                  }
-                "
-                :class="isGoalSet?.includes(idx) ? 'onset-btn active' : 'onset-btn'"
+                @click="() => handleOnset(reminder.id)"
+                :class="isGoalSet?.includes(reminder.id) ? 'onset-btn active' : 'onset-btn'"
               ></button>
               <h3 class="title">{{ reminder.title }}</h3>
             </div>
 
             <div class="cd-actions">
               <span class="date">{{ reminder.remindTime }}</span>
+              <button class="edit-btn click-effect" @click="editGoal(reminder.id)">✎</button>
               <button class="delete-btn click-effect" @click="deleteGoal(reminder.id)">✕</button>
             </div>
           </div>
@@ -76,14 +136,15 @@ const deleteGoal = (id: number) => {
                 () => {
                   setForePanel(true)
                   handleSubgoalScoped(reminder.id)
+                  setGoalTitle(reminder.title)
                 }
               "
             >
               <span>Sub Goal</span>
             </button>
 
-            <button>
-              <span>Complete</span>
+            <button @click="toggleComplete(reminder.id)">
+              <span>{{ completedIds.includes(reminder.id) ? 'Undo' : 'Complete' }}</span>
             </button>
           </div>
         </div>
@@ -122,6 +183,12 @@ main {
   font-size: 0.9rem;
   cursor: pointer;
   color: var(--text-primary);
+}
+
+.btns-cnt button.active {
+  background: orangered;
+  color: white;
+  border-color: orangered;
 }
 
 .cd-div-1 {
@@ -211,6 +278,25 @@ main {
 }
 .delete-btn:hover {
   color: #e74c3c;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.3rem;
+  line-height: 1;
+}
+.edit-btn:hover {
+  color: #3498db;
+}
+
+.is-completed {
+  opacity: 0.6;
+  filter: grayscale(0.5);
 }
 
 .desc-cnt {

@@ -7,15 +7,52 @@ import {
   setSubGoalData,
   subGoals,
   subGoalData,
+  editData,
+  setEditData,
   type subgoaldata,
 } from '@/data/general'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const title = ref('')
 const description = ref('')
 const remindeme = ref('')
 const time = ref('')
 const sbg = ref<string[]>([])
+
+const isEditing = ref(false)
+
+watch(editData, (val) => {
+  if (val) {
+    isEditing.value = true
+    title.value = val.title
+    description.value = val.description
+    const parts = val.remindTime.split(' ')
+    if (parts[0] && parts[0].includes('-')) {
+      remindeme.value = parts[0]
+      time.value = parts.slice(1).join(' ')
+    } else {
+      remindeme.value = ''
+      time.value = parts.join(' ')
+    }
+
+    const sgKey = `c${val.id}`
+    const existingSubgoals = subGoalData.value[sgKey]
+    if (existingSubgoals && existingSubgoals.length > 0) {
+      sbg.value = existingSubgoals.map((sg) => sg.title ?? '')
+      setSubGoal(subGoals.value, (prev) => {
+        prev.length = 0
+        existingSubgoals.forEach((_, i) => prev.push(`${i + 1}`))
+      })
+    }
+  } else {
+    isEditing.value = false
+    title.value = ''
+    description.value = ''
+    remindeme.value = ''
+    time.value = ''
+    sbg.value = []
+  }
+})
 
 const handleReminder = () => {
   if (
@@ -25,13 +62,45 @@ const handleReminder = () => {
     alert('Please fill in all info')
     return
   }
+
+  if (isEditing.value && editData.value) {
+    const editId = editData.value.id
+    const idx = reminders.value.findIndex((r) => r.id === editId)
+    if (idx !== -1) {
+      setReminders(reminders.value, (prev) => {
+        const existing = prev[idx]
+        if (existing) {
+          prev[idx] = {
+            ...existing,
+            title: title.value.toString(),
+            description: description.value.toString(),
+            remindTime: `${remindeme.value} ${time.value}`.trim(),
+          }
+        }
+      })
+    }
+
+    const sgKey = `c${editId}`
+    const goalList: subgoaldata[] = []
+    sbg.value.forEach((value) => {
+      goalList.push({ id: goalList.length, title: value, isCompleted: false })
+    })
+    setSubGoalData(subGoalData.value, (prev) => {
+      prev[sgKey] = goalList
+    })
+
+    setEditData(null)
+    setAddPanel(false)
+    return
+  }
+
   const last = reminders.value[reminders.value.length - 1]
   const newId = last ? last.id + 1 : 1
   const data = {
     id: newId,
     title: title.value.toString(),
     description: description.value.toString(),
-    remindTime: `${time.value}`,
+    remindTime: `${remindeme.value} ${time.value}`,
     setTime: '1:46 PM',
   }
   setReminders(reminders.value, (prev) => prev.push(data))
@@ -54,13 +123,14 @@ const handleReminder = () => {
 <template>
   <div class="add-panel">
     <div class="goal-hd">
-      <h1>Add Goal</h1>
+      <h1>{{ isEditing ? 'Edit Goal' : 'Add Goal' }}</h1>
       <button
         class="close-btn click-effect"
         @click="
           () => {
             setAddPanel(false)
             setSubGoal([])
+            setEditData(null)
           }
         "
       >
@@ -118,7 +188,7 @@ const handleReminder = () => {
         "
         class="click-effect"
       >
-        Add
+        {{ isEditing ? 'Update' : 'Add' }}
       </button>
     </div>
   </div>
@@ -270,6 +340,7 @@ const handleReminder = () => {
   border-bottom: 1px solid var(--border-cl);
   outline: none;
   background: none;
+  color: var(--text-primary);
 }
 .sub-goal {
   padding: 0.5rem;
