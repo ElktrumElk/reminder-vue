@@ -53,6 +53,7 @@ h2 {
   padding: 1rem;
   justify-content: space-between;
   box-shadow: var(--shadow-card);
+  color: var(--text-primary);
 }
 
 .card:nth-child(1) {

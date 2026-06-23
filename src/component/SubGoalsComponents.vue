@@ -29,11 +29,13 @@ import { subgoalScoped } from '@/data/general'
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  color: var(--text-primary);
 }
 
 .x * {
   width: 100%;
 }
+
 
 .x ol {
   display: flex;

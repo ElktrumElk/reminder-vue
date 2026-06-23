@@ -7,7 +7,7 @@ import SubGoalsComponents from './SubGoalsComponents.vue'
 
 <template>
   <ForegroungPanel
-    :title="{ title: 'SubGoal', style: { fontSize: '1.4rem' } }"
+    :title="{ title: 'SubGoal', style: { fontSize: '1.4rem', color: 'var(--text-primary)' } }"
     v-on:close="() => setForePanel(false)"
     :comp="SubGoalsComponents"
   />

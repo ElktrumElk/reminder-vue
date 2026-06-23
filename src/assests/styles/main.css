@@ -19,13 +19,3 @@
   overflow-x: hidden;
 }
 
-
-
-@keyframes fade {
-  from {
-    background-color: red;
-  }
-  to {
-    background-color: blue;
-  }
-}

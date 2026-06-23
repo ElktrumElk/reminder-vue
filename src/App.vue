@@ -10,12 +10,18 @@ import SubGaolsPanel from './component/SubGaolsPanel.vue'
 <template>
   <div class="app">
     <HeaderComponent />
-    <RouterView />
+    <router-view v-slot="{ Component }">
+      <Transition name="page" mode="out-in">
+        <component :is="Component" />
+      </Transition>
+    </router-view>
     <FooterComponent />
-    <Transition mode="in-out" name="fade" type="transition" :duration="{ enter: 1, leave: 1 }">
+    <Transition name="slide-up">
       <AddGoalComponent v-if="isAddPanel" />
     </Transition>
-    <SubGaolsPanel v-if="isForepanel" />
+    <Transition name="slide-up">
+      <SubGaolsPanel v-if="isForepanel" />
+    </Transition>
   </div>
 </template>
 

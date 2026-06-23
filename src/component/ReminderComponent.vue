@@ -21,8 +21,8 @@ const removeGoal = (idx: number) => {
     </div>
 
     <section class="r-section">
-      <div class="r-div">
-        <div class="card" v-for="(reminder, idx) in reminders" :key="idx">
+      <TransitionGroup name="card-stagger" tag="div" class="r-div">
+        <div class="card" v-for="(reminder, idx) in reminders" :key="reminder.id" :style="{ '--i': idx }">
           <div class="cd-header">
             <div class="cd-div-1">
               <button
@@ -66,7 +66,7 @@ const removeGoal = (idx: number) => {
             </button>
           </div>
         </div>
-      </div>
+      </TransitionGroup>
     </section>
   </main>
 </template>

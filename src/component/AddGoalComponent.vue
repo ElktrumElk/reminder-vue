@@ -180,6 +180,7 @@ const handleReminder = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: var(--text-primary);
 }
 
 .sub-goal-sec ol {
@@ -195,6 +196,7 @@ const handleReminder = () => {
   display: flex;
   width: 100%;
   gap: 1rem;
+  color: var(--text-primary);
 }
 
 .sub-goal-sec ol li input {
@@ -204,6 +206,7 @@ const handleReminder = () => {
   width: 100%;
   outline: none;
   border-block-end: 1px solid var(--border-cl);
+  color: var(--text-primary);
 }
 
 .no-sub {
@@ -225,6 +228,7 @@ const handleReminder = () => {
   overflow-x: hidden;
   overflow-y: auto;
   gap: 1rem;
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -281,5 +285,6 @@ const handleReminder = () => {
   border: 1px solid var(--border-cl);
   border-radius: 4rem;
   background: none;
+  color: var(--text-primary);
 }
 </style>
